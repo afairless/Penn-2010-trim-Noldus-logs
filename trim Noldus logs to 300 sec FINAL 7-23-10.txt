@@ -1,0 +1,50 @@
+Sub Trim()
+' Andrew Fairless, July 2010
+' The behaviors that are scored in the Noldus Observer XT software should be for set periods of time (e.g., 5 min).
+' In some cases, Noldus event logs have behaviors that are scored beyond the specified times.
+' This program changes the time indices for any events beyond the allotted time so that they are no longer counted.
+
+Dim StartTime As Single
+Dim Duration As Single
+Dim EndTime As Single
+Dim StateStop As String
+Dim BehaviorToDelete As String
+
+    Application.ScreenUpdating = False
+    Duration = 300      ' The Noldus log should include exactly 300 sec, or 5 min
+    StateStop = "State stop"
+
+    Selection.CurrentRegion.Select
+    Selection.Range("A1").Select
+    
+    If ActiveCell.Value <> "" Then
+        Do Until IsNumeric(ActiveCell.Value) = True
+            ActiveCell.Offset(1, 0).Select
+        Loop
+    Else
+        MsgBox ("This is an empty cell.  Please select a non-empty cell.")
+    End If
+        
+    StartTime = ActiveCell.Value
+    EndTime = StartTime + Duration
+    
+    Do Until ActiveCell.Value = ""
+        ActiveCell.Offset(1, 0).Select
+        If ActiveCell.Value > EndTime Then
+            ActiveCell.Value = EndTime
+        End If
+    Loop
+    
+    Do
+        ActiveCell.Offset(-1, 0).Select
+        If ActiveCell.Offset(0, 5).Value = StateStart Then
+            BehaviorToDelete = ActiveCell.Offset(0, 4).Value
+            Selection.EntireRow.Delete
+            Do Until ActiveCell.Offset(0, 4) = BehaviorToDelete Or ActiveCell.Value = ""
+                ActiveCell.Offset(1, 0).Select
+            Loop
+            Selection.EntireRow.Delete
+        End If
+    Loop Until ActiveCell.Value <> EndTime
+        
+End Sub
